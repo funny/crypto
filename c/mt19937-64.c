@@ -55,37 +55,41 @@
 
 
 #include <stdio.h>
-#include "mt64.h"
+#include <stdlib.h>
+#include "mt19937-64.h"
 
-#define NN 312
-#define MM 156
-#define MATRIX_A UINT64_C(0xB5026F5AA96619E9)
-#define UM UINT64_C(0xFFFFFFFF80000000) /* Most significant 33 bits */
-#define LM UINT64_C(0x7FFFFFFF) /* Least significant 31 bits */
+mt19937* mt19937_new() {
+    mt19937* mt = (mt19937*)calloc(1, sizeof(mt19937));
+    mt->mti = NN+1;
+    return mt;
+}
 
-
-/* The array for the state vector */
-static uint64_t mt[NN]; 
-/* mti==NN+1 means mt[NN] is not initialized */
-static int mti=NN+1; 
+void mt19937_free(mt19937* this) {
+    free(this);
+}
 
 /* initializes mt[NN] with a seed */
-void init_genrand64(uint64_t seed)
+void mt19937_seed(mt19937* this, uint64_t seed)
 {
+    int mti;
+    uint64_t* mt = this->mt;
+
     mt[0] = seed;
     for (mti=1; mti<NN; mti++) 
         mt[mti] =  (UINT64_C(6364136223846793005) * (mt[mti-1] ^ (mt[mti-1] >> 62)) + mti);
+
+    this->mti = mti;
 }
 
 /* initialize by an array with array-length */
 /* init_key is the array for initializing keys */
 /* key_length is its length */
-void init_by_array64(uint64_t init_key[],
-                                    uint64_t key_length)
+void mt19937_seed_by_array(mt19937* this, uint64_t init_key[], uint64_t key_length)
 {
     unsigned int i, j;
     uint64_t k;
-    init_genrand64(UINT64_C(19650218));
+    uint64_t* mt = this->mt;
+    mt19937_seed(this, UINT64_C(19650218));
     i=1; j=0;
     k = (NN>key_length ? NN : key_length);
     for (; k; k--) {
@@ -105,19 +109,25 @@ void init_by_array64(uint64_t init_key[],
     mt[0] = UINT64_C(1) << 63; /* MSB is 1; assuring non-zero initial array */ 
 }
 
+static uint64_t mag01[2]={UINT64_C(0), MATRIX_A};
+
 /* generates a random number on [0, 2^64-1]-interval */
-uint64_t genrand64_int64(void)
+uint64_t mt19937_uint64(mt19937* this)
 {
     int i;
     uint64_t x;
-    static uint64_t mag01[2]={UINT64_C(0), MATRIX_A};
+
+    int mti = this->mti;
+    uint64_t* mt = this->mt;
 
     if (mti >= NN) { /* generate NN words at one time */
 
         /* if init_genrand64() has not been called, */
         /* a default initial seed is used     */
-        if (mti == NN+1) 
-            init_genrand64(UINT64_C(5489)); 
+        if (mti == NN+1)  {
+            mt19937_seed(this, UINT64_C(5489));
+            mti = this->mti;
+        }
 
         for (i=0;i<NN-MM;i++) {
             x = (mt[i]&UM)|(mt[i+1]&LM);
@@ -140,29 +150,31 @@ uint64_t genrand64_int64(void)
     x ^= (x << 37) & UINT64_C(0xFFF7EEE000000000);
     x ^= (x >> 43);
 
+    this->mti = mti;
+
     return x;
 }
 
 /* generates a random number on [0, 2^63-1]-interval */
-int64_t genrand64_int63(void)
+int64_t mt19937_int63(mt19937* this)
 {
-    return (int64_t)(genrand64_int64() >> 1);
+    return (int64_t)(mt19937_uint64(this) >> 1);
 }
 
 /* generates a random number on [0,1]-real-interval */
-double genrand64_real1(void)
+double mt19937_real1(mt19937* this)
 {
-    return (genrand64_int64() >> 11) * (1.0/9007199254740991.0);
+    return (mt19937_uint64(this) >> 11) * (1.0/9007199254740991.0);
 }
 
 /* generates a random number on [0,1)-real-interval */
-double genrand64_real2(void)
+double mt19937_real2(mt19937* this)
 {
-    return (genrand64_int64() >> 11) * (1.0/9007199254740992.0);
+    return (mt19937_uint64(this) >> 11) * (1.0/9007199254740992.0);
 }
 
 /* generates a random number on (0,1)-real-interval */
-double genrand64_real3(void)
+double mt19937_real3(mt19937* this)
 {
-    return ((genrand64_int64() >> 12) + 0.5) * (1.0/4503599627370496.0);
+    return ((mt19937_uint64(this) >> 12) + 0.5) * (1.0/4503599627370496.0);
 }

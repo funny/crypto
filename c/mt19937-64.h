@@ -55,27 +55,42 @@
 
 #include <inttypes.h>
 
+#define NN 312
+#define MM 156
+#define MATRIX_A UINT64_C(0xB5026F5AA96619E9)
+#define UM UINT64_C(0xFFFFFFFF80000000) /* Most significant 33 bits */
+#define LM UINT64_C(0x7FFFFFFF) /* Least significant 31 bits */
+
+typedef struct mt19937 {
+    /* The array for the state vector */
+    uint64_t mt[NN]; 
+    /* mti==NN+1 means mt[NN] is not initialized */
+    int mti;
+} mt19937;
+
+mt19937* mt19937_new();
+void mt19937_free(mt19937* this);
+
 /* initializes mt[NN] with a seed */
-void init_genrand64(uint64_t seed);
+void mt19937_seed(mt19937* this, uint64_t seed);
 
 /* initialize by an array with array-length */
 /* init_key is the array for initializing keys */
 /* key_length is its length */
-void init_by_array64(uint64_t init_key[], 
-                                    uint64_t key_length);
+void mt19937_seed_by_array(mt19937* this, uint64_t init_key[], uint64_t key_length);
 
 /* generates a random number on [0, 2^64-1]-interval */
-uint64_t genrand64_int64(void);
+uint64_t mt19937_uint64(mt19937*);
 
 
 /* generates a random number on [0, 2^63-1]-interval */
-int64_t genrand64_int63(void);
+int64_t mt19937_int63(mt19937*);
 
 /* generates a random number on [0,1]-real-interval */
-double genrand64_real1(void);
+double mt19937_real1(mt19937*);
 
 /* generates a random number on [0,1)-real-interval */
-double genrand64_real2(void);
+double mt19937_real2(mt19937*);
 
 /* generates a random number on (0,1)-real-interval */
-double genrand64_real3(void);
+double mt19937_real3(mt19937*);

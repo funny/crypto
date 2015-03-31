@@ -54,23 +54,24 @@
 */
 
 #include <stdio.h>
-#include "mt64.h"
+#include "mt19937-64.h"
 
 int main(void)
 {
     int i;
     uint64_t init[4]={UINT64_C(0x12345), UINT64_C(0x23456), UINT64_C(0x34567), UINT64_C(0x45678)}, length=4;
-    init_by_array64(init, length);
-    printf("1000 outputs of genrand64_int64()\n");
+    mt19937* mt = mt19937_new();
+    mt19937_seed_by_array(mt, init, length);
     for (i=0; i<1000; i++) {
-      printf("%20llu ", genrand64_int64());
+      printf("%20llu ", mt19937_uint64(mt));
       if (i%5==4) printf("\n");
     }
-    printf("\n1000 outputs of genrand64_real2()\n");
+    printf("\n");
     for (i=0; i<1000; i++) {
-      printf("%10.8f ", genrand64_real2());
+      printf("%10.8f ", mt19937_real2(mt));
       if (i%5==4) printf("\n");
     }
+    mt19937_free(mt);
     return 0;
 }
 

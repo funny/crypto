@@ -31,11 +31,13 @@ myPrivateKey := dh64.PrivateKey()
 
 默认的生成方式是C和Go内置的伪随机函数，如果要加强安全性，可以用真随机来生成私钥，这时候以上两个函数就不需要用到了。
 
+请注意自己生成私钥的时候，私钥必须大于等于1，这是DH算法要求的。
+
 接着用这个私钥来生成一个公钥：
 
 ```
 // C
-uint64_t myPublicKey = dh64_public_key(my_private_key)
+uint64_t my_public_key = dh64_public_key(my_private_key)
 
 // Go
 myPublicKey := dh64.PublicKey(myPrivateKey)

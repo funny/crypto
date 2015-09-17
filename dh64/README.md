@@ -16,6 +16,43 @@
 
 考虑到手机游戏项目的平台兼容性和效率要求，我们决定采用64位的迪菲－赫尔曼密钥交换算法，所以建立了这个代码仓库用来收集不同语言的算法实现。
 
+用法
+====
+
+随机生成一个64位私钥：
+
+```
+// C
+uint64_t my_private_key = dh64_private_key();
+
+// Go
+myPrivateKey := dh64.PrivateKey()
+```
+
+默认的生成方式是C和Go内置的伪随机函数，如果要加强安全性，可以用真随机来生成私钥，这时候以上两个函数就不需要用到了。
+
+接着用这个私钥来生成一个公钥：
+
+```
+// C
+uint64_t myPublicKey = dh64_public_key(my_private_key)
+
+// Go
+myPublicKey := dh64.PublicKey(myPrivateKey)
+```
+
+这个公钥可以通过网络传递给对方，双方拿到对方的公钥之后，利用自己手上的私钥和对方的公钥，可以获得双方一致的一个密钥，这样就完成了密钥交换过程：
+
+```
+// C
+uint64_t secert = dh64_secert(my_private_key, another_publick_key);
+
+// Go
+secert := dh64.Secert(myPrivateKey, anotherPublicKey);
+```
+
+之后密钥就可以用于RC4之类的加密算法，来对双发的后续通讯内容做加密。
+
 相关链接
 =======
 

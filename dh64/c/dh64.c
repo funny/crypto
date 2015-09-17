@@ -52,11 +52,15 @@ powmodp(uint64_t a, uint64_t b) {
 
 uint64_t
 dh64_private_key() {
-	uint64_t a = rand();
-	uint64_t b = rand();
-	uint64_t c = rand();
-	uint64_t d = rand();
-	return a << 48 | b << 32 | c << 16 | d;
+	for (;;) {
+		uint64_t a = rand();
+		uint64_t b = rand();
+		uint64_t c = rand();
+		uint64_t d = rand();
+		uint64_t e = a << 48 | b << 32 | c << 16 | d;
+		if (e != 0)
+			return e;
+	}
 }
 
 uint64_t 

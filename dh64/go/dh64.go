@@ -56,12 +56,20 @@ func Pair() (privateKey, publicKey uint64) {
 }
 
 func PrivateKey() uint64 {
-	a := rand.Uint32()
-	b := rand.Uint32()
-	return (uint64(a) << 32) | uint64(b)
+	for {
+		a := uint64(rand.Uint32())
+		b := uint64(rand.Uint32())
+		c := a<<32 | b
+		if c != 0 {
+			return c
+		}
+	}
 }
 
 func PublicKey(privateKey uint64) uint64 {
+	if privateKey == 0 {
+		panic("DH64 zero private key")
+	}
 	return powmodp(g, privateKey)
 }
 

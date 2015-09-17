@@ -19,7 +19,7 @@ int main(void) {
 
 		assert(secret1 == secret2);
 
-		printf("{%llu, %llu, %llu},\n", public_key1, private_key1, secret1);
-		printf("{%llu, %llu, %llu},\n", public_key2, private_key2, secret2);
+		printf("{0x%016llX, 0x%016llX, 0x%016llX},\n", public_key1, private_key1, secret1);
+		printf("{0x%016llX, 0x%016llX, 0x%016llX},\n", public_key2, private_key2, secret2);
 	}
 }

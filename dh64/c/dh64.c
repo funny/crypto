@@ -10,10 +10,10 @@
 static inline uint64_t
 mul_mod_p(uint64_t a, uint64_t b) {
 	uint64_t m = 0;
-	while(b) {
-		if(b&1) {
-			uint64_t t = P-a;
-			if ( m >= t) {
+	while (b) {
+		if (b&1) {
+			uint64_t t = P - a;
+			if (m >= t) {
 				m -= t;
 			} else {
 				m += a;
@@ -24,18 +24,18 @@ mul_mod_p(uint64_t a, uint64_t b) {
 		} else {
 			a = a * 2;
 		}
-		b>>=1;
+		b >>= 1;
 	}
 	return m;
 }
 
 static inline uint64_t
 pow_mod_p(uint64_t a, uint64_t b) {
-	if (b==1) {
+	if (b == 1) {
 		return a;
 	}
 	uint64_t t = pow_mod_p(a, b>>1);
-	t = mul_mod_p(t,t);
+	t = mul_mod_p(t, t);
 	if (b % 2) {
 		t = mul_mod_p(t, a);
 	}
@@ -46,12 +46,12 @@ pow_mod_p(uint64_t a, uint64_t b) {
 static inline uint64_t
 powmodp(uint64_t a, uint64_t b) {
 	if (a > P)
-		a%=P;
-	return pow_mod_p(a,b);
+		a %= P;
+	return pow_mod_p(a, b);
 }
 
-static inline uint64_t
-random64() {
+uint64_t
+dh64_private_key() {
 	uint64_t a = rand();
 	uint64_t b = rand();
 	uint64_t c = rand();
@@ -59,14 +59,12 @@ random64() {
 	return a << 48 | b << 32 | c << 16 | d;
 }
 
-dh64 
-dh64_gen() {
-	dh64 result;
-	result.private_key = random64();
-	result.public_key = powmodp(G, result.private_key);
-	return result;
+uint64_t 
+dh64_public_key(const uint64_t private_key) {
+	return powmodp(G, private_key);
 }
 
-void dh64_init(dh64* dh, const uint64_t another_public_key) {
-	dh->secret = powmodp(another_public_key, dh->private_key);
+uint64_t
+dh64_secret(const uint64_t private_key, const uint64_t another_public_key) {
+	return powmodp(another_public_key, private_key);
 }

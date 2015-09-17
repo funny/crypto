@@ -3,14 +3,10 @@
 
 #include <stdint.h>
 
-typedef struct dh64 {
-	uint64_t public_key;
-	uint64_t private_key;
-	uint64_t secret;
-} dh64;
+uint64_t dh64_private_key();
 
-dh64 dh64_gen();
+uint64_t dh64_public_key(const uint64_t private_key);
 
-void dh64_init(dh64* dh, const uint64_t another_public);
+uint64_t dh64_secret(const uint64_t private_key, const uint64_t another_public_key);
 
 #endif

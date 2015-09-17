@@ -7,15 +7,19 @@
 // cc dh64.c dh64_test.c
 int main(void) {
 	for (int i = 0; i < 10000; i ++) {
-		dh64 dh1 = dh64_gen();
-		dh64 dh2 = dh64_gen();
+		uint64_t private_key1 = dh64_private_key();
+		uint64_t public_key1 = dh64_public_key(private_key1);
 
-		dh64_init(&dh1, dh2.public_key);
-		dh64_init(&dh2, dh1.public_key);
 
-		assert(dh1.secret == dh2.secret);
+		uint64_t private_key2 = dh64_private_key();
+		uint64_t public_key2 = dh64_public_key(private_key2);
+		
+		uint64_t secret1 = dh64_secret(private_key1, public_key2);
+		uint64_t secret2 = dh64_secret(private_key2, public_key1);
 
-		printf("dh1 = %16llx, %16llx, %16llx\n", dh1.public_key, dh1.private_key, dh1.secret);
-		printf("dh2 = %16llx, %16llx, %16llx\n", dh2.public_key, dh2.private_key, dh2.secret);
+		assert(secret1 == secret2);
+
+		printf("{%llu, %llu, %llu},\n", public_key1, private_key1, secret1);
+		printf("{%llu, %llu, %llu},\n", public_key2, private_key2, secret2);
 	}
 }

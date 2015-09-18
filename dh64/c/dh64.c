@@ -45,6 +45,10 @@ pow_mod_p(uint64_t a, uint64_t b) {
 // calc a^b % p
 static inline uint64_t
 powmodp(uint64_t a, uint64_t b) {
+	if (a == 0)
+		return 1;
+	if (b == 0)
+		return 1;
 	if (a > P)
 		a %= P;
 	return pow_mod_p(a, b);

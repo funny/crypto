@@ -43,6 +43,12 @@ func pow_mod_p(a, b uint64) uint64 {
 }
 
 func powmodp(a uint64, b uint64) uint64 {
+	if a == 0 {
+		panic("DH64 zero public key")
+	}
+	if b == 0 {
+		panic("DH64 zero private key")
+	}
 	if a > p {
 		a %= p
 	}
@@ -62,9 +68,6 @@ func PrivateKey() uint64 {
 }
 
 func PublicKey(privateKey uint64) uint64 {
-	if privateKey == 0 {
-		panic("DH64 zero private key")
-	}
 	return powmodp(g, privateKey)
 }
 

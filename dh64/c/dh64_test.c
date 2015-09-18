@@ -5,8 +5,12 @@
 #include "dh64.h"
 
 // cc dh64.c dh64_test.c
-int main(void) {
-	for (int i = 0; i < 10000; i ++) {
+int main(int argc, char **argv) {
+	int n = 10000;
+	if (argc > 1) {
+		n = atoi(argv[1]);
+	}
+	for (int i = 0; i < n; i ++) {
 		uint64_t private_key1 = dh64_private_key();
 		uint64_t public_key1 = dh64_public_key(private_key1);
 

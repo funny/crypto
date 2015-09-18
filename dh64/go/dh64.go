@@ -56,14 +56,9 @@ func Pair() (privateKey, publicKey uint64) {
 }
 
 func PrivateKey() uint64 {
-	for {
-		a := uint64(rand.Uint32())
-		b := uint64(rand.Uint32())
-		c := a<<32 | b
-		if c != 0 {
-			return c
-		}
-	}
+	a := uint64(rand.Uint32())
+	b := uint64(rand.Uint32()) + 1
+	return a<<32 | b
 }
 
 func PublicKey(privateKey uint64) uint64 {

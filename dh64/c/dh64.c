@@ -59,7 +59,7 @@ dh64_private_key() {
 	uint64_t a = rand();
 	uint64_t b = rand() & 0xFFFF;
 	uint64_t c = rand() & 0xFFFF;
-	uint64_t d = rand() & 0xFFFF + 1;
+	uint64_t d = (rand() & 0xFFFF) + 1;
 	return a << 48 | b << 32 | c << 16 | d;
 }
 

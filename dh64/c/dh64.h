@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-uint64_t dh64_private_key();
+void dh64_key_pair(uint64_t* private_key, uint64_t* public_key);
 
 uint64_t dh64_public_key(const uint64_t private_key);
 

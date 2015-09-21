@@ -7,8 +7,8 @@ import (
 
 func Test_DH64_GO(t *testing.T) {
 	for i := 0; i < 10000; i += 2 {
-		privateKey1, publicKey1 := Pair()
-		privateKey2, publicKey2 := Pair()
+		privateKey1, publicKey1 := KeyPair()
+		privateKey2, publicKey2 := KeyPair()
 
 		secret1 := Secret(privateKey1, publicKey2)
 		secret2 := Secret(privateKey2, publicKey1)

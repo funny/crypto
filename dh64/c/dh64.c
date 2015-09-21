@@ -54,13 +54,14 @@ powmodp(uint64_t a, uint64_t b) {
 	return pow_mod_p(a, b);
 }
 
-uint64_t
-dh64_private_key() {
+void 
+dh64_key_pair(uint64_t* private_key, uint64_t* public_key) {
 	uint64_t a = rand();
 	uint64_t b = rand() & 0xFFFF;
 	uint64_t c = rand() & 0xFFFF;
 	uint64_t d = (rand() & 0xFFFF) + 1;
-	return a << 48 | b << 32 | c << 16 | d;
+	*private_key = a << 48 | b << 32 | c << 16 | d;
+	*public_key  = powmodp(G, *private_key);
 }
 
 uint64_t 

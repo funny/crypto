@@ -55,16 +55,12 @@ func powmodp(a uint64, b uint64) uint64 {
 	return pow_mod_p(a, b)
 }
 
-func Pair() (privateKey, publicKey uint64) {
-	privateKey = PrivateKey()
-	publicKey = PublicKey(privateKey)
-	return
-}
-
-func PrivateKey() uint64 {
+func KeyPair() (privateKey, publicKey uint64) {
 	a := uint64(rand.Uint32())
 	b := uint64(rand.Uint32()) + 1
-	return a<<32 | b
+	privateKey = a<<32 | b
+	publicKey = PublicKey(privateKey)
+	return
 }
 
 func PublicKey(privateKey uint64) uint64 {

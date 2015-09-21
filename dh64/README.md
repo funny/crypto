@@ -32,20 +32,6 @@ dh64_key_pair(&my_private_key, &my_public_key);
 myPrivateKey, myPublicKey := dh64.KeyPair()
 ```
 
-默认的生成方式使用的是C和Go内置的伪随机函数，如果要加强安全性可以自己用真随机来生成一个64位的私钥，然后单独生成DH64交换用的公钥：
-
-NOTE: 请注意自己生成私钥的时候，私钥必须大于等于1，这是DH算法要求的。
-
-```
-// C
-uint64_t my_private_key = my_real_random64();
-uint64_t my_public_key = dh64_public_key(my_private_key);
-
-// Go
-myPrivateKey := MyRealRandom64();
-myPublicKey := dh64.PublicKey(myPrivateKey);
-```
-
 用以上方式获得公钥之后，就可以通过网络把公钥传递给对方，双方互相拿到对方的公钥之后，利用自己手上的私钥和对方的公钥就可以计算出双方一致的密钥，这样就完成了密钥交换过程：
 
 ```
@@ -57,6 +43,23 @@ secert := dh64.Secert(myPrivateKey, anotherPublicKey);
 ```
 
 最终这个密钥就可以用于RC4之类的加密算法来对双发的后续通讯内容做加密了。
+
+进阶用法
+=======
+
+默认的生成方式使用的是C和Go内置的伪随机函数，如果要加强安全性可以自己用真随机来生成一个64位的私钥，然后单独生成DH64交换用的公钥：
+
+```
+// C
+uint64_t my_private_key = my_real_random64();
+uint64_t my_public_key = dh64_public_key(my_private_key);
+
+// Go
+myPrivateKey := MyRealRandom64();
+myPublicKey := dh64.PublicKey(myPrivateKey);
+```
+
+NOTE: 请注意自己生成私钥的时候，私钥必须大于等于1，这是DH算法要求的。
 
 相关链接
 =======

@@ -58,7 +58,7 @@ func powmodp(a uint64, b uint64) uint64 {
 func KeyPair() (privateKey, publicKey uint64) {
 	a := uint64(rand.Uint32())
 	b := uint64(rand.Uint32()) + 1
-	privateKey = a<<32 | b
+	privateKey = (a << 32) | b
 	publicKey = PublicKey(privateKey)
 	return
 }

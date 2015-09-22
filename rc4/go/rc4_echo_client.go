@@ -41,14 +41,14 @@ func main() {
 
 	for {
 		send = randomData(send)
-		writer.WritePacket(send, binary.SplitByUvarint)
+		writer.WritePacket(send, binary.SplitByUint32LE)
 		if writer.Error() != nil {
 			log.Print("send failed: ", writer.Error())
 			return
 		}
 		sendPacketCount += 1
 
-		recv := reader.ReadPacket(binary.SplitByUvarint)
+		recv := reader.ReadPacket(binary.SplitByUint32LE)
 		if reader.Error() != nil {
 			log.Print("receive failed: ", reader.Error())
 			return
@@ -82,13 +82,13 @@ func conn_init(conn net.Conn) (*binary.Writer, *binary.Reader, error) {
 
 	privateKey, publicKey := dh64.KeyPair()
 	log.Print("client send public key: ", publicKey)
-	writer.WriteUint64BE(publicKey)
+	writer.WriteUint64LE(publicKey)
 	if writer.Error() != nil {
 		return nil, nil, writer.Error()
 	}
 
 	log.Print("client wait server public key")
-	serverPublicKey := reader.ReadUint64BE()
+	serverPublicKey := reader.ReadUint64LE()
 	if reader.Error() != nil {
 		return nil, nil, reader.Error()
 	}
@@ -98,7 +98,7 @@ func conn_init(conn net.Conn) (*binary.Writer, *binary.Reader, error) {
 	log.Print("secert: ", secert)
 
 	key := make([]byte, 8)
-	binary.PutUint64BE(key, secert)
+	binary.PutUint64LE(key, secert)
 	rc4stream, err := rc4.NewCipher(key)
 	if err != nil {
 		return nil, nil, err

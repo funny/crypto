@@ -81,3 +81,4 @@ NOTE: 请注意自己生成私钥的时候，私钥必须大于等于1，这是D
 
 1. [迪菲－赫尔曼密钥交换](https://zh.wikipedia.org/wiki/%E8%BF%AA%E8%8F%B2%EF%BC%8D%E8%B5%AB%E5%B0%94%E6%9B%BC%E5%AF%86%E9%92%A5%E4%BA%A4%E6%8D%A2)
 2. [云风开源的C版本代码](https://gist.github.com/cloudwu/8838724)
+3. [DH64密钥交换 + RC4加密的演示](https://github.com/funny/crypto/tree/master/rc4)

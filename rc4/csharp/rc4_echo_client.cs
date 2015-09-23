@@ -10,14 +10,11 @@ class MainClass
 
 	public static void Main(string[] args) {
 		TcpClient conn = new TcpClient("127.0.0.1", 10010);
+		Console.WriteLine("client connect");
 
 		Stream stream = conn.GetStream();
-		BinaryWriter writer = new BinaryWriter(stream);
 		BinaryReader reader = new BinaryReader(stream);
-
-		byte[] key = KeyExchange(writer, reader);
-		writer = new BinaryWriter(new RC4Stream(stream, key));
-		Console.WriteLine("key: {0}", BitConverter.ToString(key));
+		BinaryWriter writer = ConnInit(reader);
 
 		byte[] buffer = new byte[1024];
 		for (;;) {
@@ -26,29 +23,37 @@ class MainClass
 			byte[] recv = reader.ReadBytes((int)n);
 			if (!ByteArrayEquals(buffer, recv, length)) {
 				Console.WriteLine("send != recv");
+				Console.WriteLine("send: {0}", BitConverter.ToString(buffer, length));
+				Console.WriteLine("recv: {0}", BitConverter.ToString(recv));
 				return;
 			}
 		}
 	}
 
-	private static byte[] KeyExchange(BinaryWriter w, BinaryReader r) {
+	// Do DH64 key exchange and return a RC4 writer
+	private static BinaryWriter ConnInit(BinaryReader r) {
 		ulong privateKey;
 		ulong publicKey;
 		dh64.KeyPair(out privateKey, out publicKey);
-
 		Console.WriteLine("client public key: {0}", publicKey);
-		w.Write(publicKey);
 
+		new BinaryWriter(r.BaseStream).Write(publicKey);
 		ulong srvPublicKey = r.ReadUInt64();
 		Console.WriteLine("server public key: {0}", srvPublicKey);
 
 		ulong secret = dh64.Secret(privateKey, srvPublicKey);
 		Console.WriteLine("secret: {0}", secret);
 
+		byte[] key;
 		using (MemoryStream ms = new MemoryStream()) {
 			new BinaryWriter(ms).Write(secret);
-			return ms.ToArray();
+			key = ms.ToArray();
 		}
+		Console.WriteLine("key: {0}", BitConverter.ToString(key).Replace("-", "").ToLower());
+
+		return new BinaryWriter(
+			new RC4Stream(r.BaseStream, key)
+		);
 	}
 
 	private static int WriteRandomBytes(BinaryWriter w, byte[] buffer) {

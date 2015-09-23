@@ -30,7 +30,7 @@ func main() {
 			log.Print("accept failed: ", err)
 			return
 		}
-		log.Print("server accpet")
+		log.Print("server accpet: ", conn.RemoteAddr())
 
 		go func() {
 			writer, reader, err := conn_init(conn)
@@ -79,19 +79,18 @@ func conn_init(conn net.Conn) (*binary.Writer, *binary.Reader, error) {
 	rand.Seed(time.Now().UnixNano())
 
 	privateKey, publicKey := dh64.KeyPair()
-	log.Print("server send public key: ", publicKey)
+	log.Print("server public key: ", publicKey)
+
 	writer.WriteUint64LE(publicKey)
 	if writer.Error() != nil {
 		return nil, nil, writer.Error()
 	}
-
-	log.Print("server wait client public key")
 	clientPublicKey := reader.ReadUint64LE()
 	if reader.Error() != nil {
 		return nil, nil, reader.Error()
 	}
-
 	log.Print("client public key: ", clientPublicKey)
+
 	secert := dh64.Secret(privateKey, clientPublicKey)
 	log.Print("secert: ", secert)
 
@@ -101,7 +100,7 @@ func conn_init(conn net.Conn) (*binary.Writer, *binary.Reader, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	log.Print("key:", hex.EncodeToString(key))
+	log.Print("key: ", hex.EncodeToString(key))
 
 	reader = binary.NewReader(cipher.StreamReader{
 		R: conn,

@@ -45,19 +45,6 @@ class RC4Stream : Stream
 		this.j = j;
 	}
 
-	public class KeySizeException : Exception
-	{
-		private int size;
-
-		public KeySizeException(int size) {
-			this.size = size;
-		}
-
-		public override string Message {
-			get { return "RC4Stream: invalid key size " + size; }
-		}
-	}
-
 	public override int Read(byte[] buffer, int offset, int count) {
 		count = stream.Read(buffer, offset, count);
 		xorKeyStreamGeneric(buffer, offset, buffer, offset, count);
@@ -101,5 +88,18 @@ class RC4Stream : Stream
 
 	public override void Flush() {
 		stream.Flush();
+	}
+
+	public class KeySizeException : Exception
+	{
+		private int size;
+
+		public KeySizeException(int size) {
+			this.size = size;
+		}
+
+		public override string Message {
+			get { return "RC4Stream: invalid key size " + size; }
+		}
 	}
 }

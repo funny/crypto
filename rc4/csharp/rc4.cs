@@ -22,7 +22,7 @@ class RC4Stream : Stream
 		byte j = 0;
 		uint t = 0;
 		for (int i = 0; i < 256; i++) {
-			j += (byte)((byte)s[i] + key[i % k]);
+			j = (byte)(j + s[i] + key[i % k]);
 			t = s[i];
 			s[i] = s[j];
 			s[j] = t;
@@ -35,7 +35,7 @@ class RC4Stream : Stream
 		uint t = 0;
 		for (int k = 0; k < count; k ++) {
 			i += 1;
-			j += (byte)s[i];
+			j = (byte)(s[i] + j);
 			t = s[i];
 			s[i] = s[j];
 			s[j] = t;

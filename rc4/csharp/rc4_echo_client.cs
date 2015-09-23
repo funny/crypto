@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Net.Sockets;
 
+// mcs rc4_echo_client.cs rc4.cs ../../dh64/csharp/dh64.cs
 class MainClass
 {
 	private static DH64 dh64 = new DH64();
@@ -16,6 +17,7 @@ class MainClass
 
 		byte[] key = KeyExchange(writer, reader);
 		writer = new BinaryWriter(new RC4Stream(stream, key));
+		Console.WriteLine("key: {0}", BitConverter.ToString(key));
 
 		byte[] buffer = new byte[1024];
 		for (;;) {
@@ -45,7 +47,7 @@ class MainClass
 
 		using (MemoryStream ms = new MemoryStream()) {
 			new BinaryWriter(ms).Write(secret);
-			return ms.GetBuffer();
+			return ms.ToArray();
 		}
 	}
 
@@ -54,7 +56,6 @@ class MainClass
 		for (int i = 0; i < length; i ++) {
 			buffer[i] = (byte)random.Next(256);
 		}
-		Console.WriteLine(length);
 		w.Write((uint)length);
 		w.Write(buffer, 0, length);
 		return length;

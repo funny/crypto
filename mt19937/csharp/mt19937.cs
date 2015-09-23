@@ -1,4 +1,4 @@
-namespace MersenneTwister
+namespace Funny.Crypto
 {
     /// <summary>
     /// This code was posted by arithma http://www.lebgeeks.com/forums/viewtopic.php?pid=60482#p60482

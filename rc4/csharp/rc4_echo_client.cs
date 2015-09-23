@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Net.Sockets;
+using Funny.Crypto;
 
 // mcs rc4_echo_client.cs rc4.cs ../../dh64/csharp/dh64.cs
 class MainClass

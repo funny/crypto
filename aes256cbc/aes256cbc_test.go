@@ -8,10 +8,10 @@ import (
 )
 
 func Benchmark_Decrypt(b *testing.B) {
+	opensslEncrypted := []byte("U2FsdGVkX19ZM5qQJGe/d5A/4pccgH+arBGTp+QnWPU=")
+	passphrase := []byte("z4yH36a6zerhfE5427ZV")
 	for i := 0; i < b.N; i++ {
-		opensslEncrypted := []byte("U2FsdGVkX19ZM5qQJGe/d5A/4pccgH+arBGTp+QnWPU=")
-		passphrase := []byte("z4yH36a6zerhfE5427ZV")
-		Decrypt(passphrase, opensslEncrypted)
+		DecryptBase64(passphrase, opensslEncrypted)
 	}
 }
 

@@ -2,7 +2,7 @@
 // with autmatic IV derivation and storage. As long as the key is known all
 // data can also get decrypted using OpenSSL CLI.
 // Code from http://dequeue.blogspot.de/2014/11/decrypting-something-encrypted-with.html
-package aes256cbc // import "github.com/funny/crypto/aes256cbc"
+package aes256cbc
 
 import (
 	"bytes"
@@ -43,50 +43,60 @@ func (c *openSSLCreds) Extract(password, salt []byte) (key, iv []byte) {
 	return c[:32], c[32:]
 }
 
-// DecryptString decrypts a string that was encrypted using OpenSSL and AES-256-CBC.
+// DecryptString decrypts a base64 encoded string that was encrypted using OpenSSL and AES-256-CBC.
 func DecryptString(passphrase, encryptedBase64String string) (string, error) {
-	text, err := Decrypt([]byte(passphrase), []byte(encryptedBase64String))
+	text, err := DecryptBase64([]byte(passphrase), []byte(encryptedBase64String))
 	return string(text), err
 }
 
-// Decrypt decrypts a []byte that was encrypted using OpenSSL and AES-256-CBC.
-func Decrypt(passphrase, encryptedBase64 []byte) ([]byte, error) {
-	data := make([]byte, base64.StdEncoding.DecodedLen(len(encryptedBase64)))
-	n, err := base64.StdEncoding.Decode(data, encryptedBase64)
+// DecryptBase64 decrypts a base64 encoded []byte that was encrypted using OpenSSL and AES-256-CBC.
+func DecryptBase64(passphrase, encryptedBase64 []byte) ([]byte, error) {
+	encrypted := make([]byte, base64.StdEncoding.DecodedLen(len(encryptedBase64)))
+	n, err := base64.StdEncoding.Decode(encrypted, encryptedBase64)
 	if err != nil {
 		return nil, err
 	}
-	saltHeader := data[:aes.BlockSize]
+	return Decrypt(passphrase, encrypted[:n])
+}
+
+// Decrypt decrypts a []byte that was encrypted using OpenSSL and AES-256-CBC.
+func Decrypt(passphrase, encrypted []byte) ([]byte, error) {
+	if len(encrypted) < aes.BlockSize {
+		return nil, fmt.Errorf("Cipher data length less than aes block size")
+	}
+	saltHeader := encrypted[:aes.BlockSize]
 	if !bytes.Equal(saltHeader[:8], openSSLSaltHeader) {
 		return nil, fmt.Errorf("Does not appear to have been encrypted with OpenSSL, salt header missing.")
 	}
 	var creds openSSLCreds
 	key, iv := creds.Extract(passphrase, saltHeader[8:])
-	return decrypt(key, iv, data[:n])
-}
 
-func decrypt(key, iv, data []byte) ([]byte, error) {
-	if len(data) == 0 || len(data)%aes.BlockSize != 0 {
-		return nil, fmt.Errorf("bad blocksize(%v), aes.BlockSize = %v\n", len(data), aes.BlockSize)
+	if len(encrypted) == 0 || len(encrypted)%aes.BlockSize != 0 {
+		return nil, fmt.Errorf("bad blocksize(%v), aes.BlockSize = %v\n", len(encrypted), aes.BlockSize)
 	}
 	c, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
 	}
 	cbc := cipher.NewCBCDecrypter(c, iv)
-	cbc.CryptBlocks(data[aes.BlockSize:], data[aes.BlockSize:])
-	out, err := pkcs7Unpad(data[aes.BlockSize:])
-	if out == nil {
-		return nil, err
-	}
-	return out, nil
+	cbc.CryptBlocks(encrypted[aes.BlockSize:], encrypted[aes.BlockSize:])
+	return pkcs7Unpad(encrypted[aes.BlockSize:])
 }
 
 // EncryptString encrypts a string in a manner compatible to OpenSSL encryption
-// functions using AES-256-CBC as encryption algorithm
+// functions using AES-256-CBC as encryption algorithm and encode to base64 format.
 func EncryptString(passphrase, plaintextString string) (string, error) {
-	text, err := Encrypt([]byte(passphrase), []byte(plaintextString))
-	return string(text), err
+	encryptedBase64, err := EncryptBase64([]byte(passphrase), []byte(plaintextString))
+	return string(encryptedBase64), err
+}
+
+// EncryptBase64 encrypts a []byte in a manner compatible to OpenSSL encryption
+// functions using AES-256-CBC as encryption algorithm and encode to base64 format.
+func EncryptBase64(passphrase, plaintext []byte) ([]byte, error) {
+	encrypted, err := Encrypt(passphrase, plaintext)
+	encryptedBase64 := make([]byte, base64.StdEncoding.EncodedLen(len(encrypted)))
+	base64.StdEncoding.Encode(encryptedBase64, encrypted)
+	return encryptedBase64, err
 }
 
 // Encrypt encrypts a []byte in a manner compatible to OpenSSL encryption
@@ -105,14 +115,11 @@ func Encrypt(passphrase, plaintext []byte) ([]byte, error) {
 
 	var creds openSSLCreds
 	key, iv := creds.Extract(passphrase, salt[:])
-	enc, err := encrypt(key, iv, data)
+	encrypted, err := encrypt(key, iv, data)
 	if err != nil {
 		return nil, err
 	}
-
-	encryptedBase64 := make([]byte, base64.StdEncoding.EncodedLen(len(enc)))
-	base64.StdEncoding.Encode(encryptedBase64, enc)
-	return encryptedBase64, nil
+	return encrypted, nil
 }
 
 func encrypt(key, iv, data []byte) ([]byte, error) {

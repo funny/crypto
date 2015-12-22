@@ -1,4 +1,4 @@
-// This package is a helper to generate OpenSSL compatible encryption
+// Package aes256cbc is a helper to generate OpenSSL compatible encryption
 // with autmatic IV derivation and storage. As long as the key is known all
 // data can also get decrypted using OpenSSL CLI.
 // Code from http://dequeue.blogspot.de/2014/11/decrypting-something-encrypted-with.html

@@ -7,6 +7,14 @@ import (
 	"testing"
 )
 
+func Benchmark_Decrypt(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		opensslEncrypted := []byte("U2FsdGVkX19ZM5qQJGe/d5A/4pccgH+arBGTp+QnWPU=")
+		passphrase := []byte("z4yH36a6zerhfE5427ZV")
+		Decrypt(passphrase, opensslEncrypted)
+	}
+}
+
 func TestDecryptFromString(t *testing.T) {
 	// > echo -n "hallowelt" | openssl aes-256-cbc -pass pass:z4yH36a6zerhfE5427ZV -a -salt
 	// U2FsdGVkX19ZM5qQJGe/d5A/4pccgH+arBGTp+QnWPU=

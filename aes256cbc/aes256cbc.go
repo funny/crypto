@@ -75,7 +75,7 @@ func decrypt(key, iv, data []byte) ([]byte, error) {
 	}
 	cbc := cipher.NewCBCDecrypter(c, iv)
 	cbc.CryptBlocks(data[aes.BlockSize:], data[aes.BlockSize:])
-	out, err := pkcs7Unpad(data[aes.BlockSize:], aes.BlockSize)
+	out, err := pkcs7Unpad(data[aes.BlockSize:])
 	if out == nil {
 		return nil, err
 	}
@@ -116,7 +116,7 @@ func Encrypt(passphrase, plaintext []byte) ([]byte, error) {
 }
 
 func encrypt(key, iv, data []byte) ([]byte, error) {
-	padded, err := pkcs7Pad(data, aes.BlockSize)
+	padded, err := pkcs7Pad(data)
 	if err != nil {
 		return nil, err
 	}
@@ -129,36 +129,34 @@ func encrypt(key, iv, data []byte) ([]byte, error) {
 	return padded, nil
 }
 
-// pkcs7Pad appends padding.
-func pkcs7Pad(data []byte, blocklen int) ([]byte, error) {
-	if blocklen <= 0 {
-		return nil, fmt.Errorf("invalid blocklen %d", blocklen)
+var padPatterns [aes.BlockSize][]byte
+
+func init() {
+	for i := 0; i < len(padPatterns); i++ {
+		padPatterns[i] = bytes.Repeat([]byte{byte(i)}, i)
 	}
+}
+
+// pkcs7Pad appends padding.
+func pkcs7Pad(data []byte) ([]byte, error) {
 	padlen := 1
-	for ((len(data) + padlen) % blocklen) != 0 {
+	for ((len(data) + padlen) % aes.BlockSize) != 0 {
 		padlen = padlen + 1
 	}
-	pad := bytes.Repeat([]byte{byte(padlen)}, padlen)
-	return append(data, pad...), nil
+	return append(data, padPatterns[padlen]...), nil
 }
 
 // pkcs7Unpad returns slice of the original data without padding.
-func pkcs7Unpad(data []byte, blocklen int) ([]byte, error) {
-	if blocklen <= 0 {
-		return nil, fmt.Errorf("invalid blocklen %d", blocklen)
-	}
-	if len(data)%blocklen != 0 || len(data) == 0 {
+func pkcs7Unpad(data []byte) ([]byte, error) {
+	if len(data)%aes.BlockSize != 0 || len(data) == 0 {
 		return nil, fmt.Errorf("invalid data len %d", len(data))
 	}
 	padlen := int(data[len(data)-1])
-	if padlen > blocklen || padlen == 0 {
+	if padlen > aes.BlockSize || padlen == 0 {
 		return nil, fmt.Errorf("invalid padding")
 	}
-	pad := data[len(data)-padlen:]
-	for i := 0; i < padlen; i++ {
-		if pad[i] != byte(padlen) {
-			return nil, fmt.Errorf("invalid padding")
-		}
+	if !bytes.Equal(padPatterns[padlen], data[len(data)-padlen:]) {
+		return nil, fmt.Errorf("invalid padding")
 	}
 	return data[:len(data)-padlen], nil
 }

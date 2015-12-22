@@ -38,7 +38,7 @@ func main() {
 ```go
 import (
   "fmt"
-  "github.com/Luzifer/go-openssl"
+  "github.com/funny/crypto/aes256cbc"
 )
 
 func main() {

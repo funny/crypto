@@ -108,7 +108,7 @@ func Encrypt(passphrase, plaintext []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	data := make([]byte, len(plaintext)+aes.BlockSize)
+	data := make([]byte, len(plaintext)+aes.BlockSize, len(plaintext)+aes.BlockSize+1 /* for append '\n' */)
 	copy(data[0:], openSSLSaltHeader)
 	copy(data[8:], salt[:])
 	copy(data[aes.BlockSize:], plaintext)
@@ -146,6 +146,9 @@ func init() {
 
 // pkcs7Pad appends padding.
 func pkcs7Pad(data []byte) ([]byte, error) {
+	if len(data)%aes.BlockSize == 0 {
+		return data, nil
+	}
 	padlen := 1
 	for ((len(data) + padlen) % aes.BlockSize) != 0 {
 		padlen = padlen + 1

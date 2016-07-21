@@ -136,7 +136,7 @@ func encrypt(key, iv, data []byte) ([]byte, error) {
 	return padded, nil
 }
 
-var padPatterns [aes.BlockSize][]byte
+var padPatterns [aes.BlockSize+1][]byte
 
 func init() {
 	for i := 0; i < len(padPatterns); i++ {

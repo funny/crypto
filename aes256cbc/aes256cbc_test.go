@@ -77,3 +77,29 @@ func TestEncryptToOpenSSL(t *testing.T) {
 		t.Errorf("OpenSSL output did not match input.\nOutput was: %s", out.String())
 	}
 }
+
+func TestDecryptFromOpenSSL(t *testing.T) {
+        plaintext := "192.168.2.2:8080"
+        passphrase := "sofunny"
+
+        // WTF? Without "echo" openssl tells us "error reading input file"
+        cmd := exec.Command("/bin/bash", "-c", fmt.Sprintf("echo -n \"%s\" | openssl enc -e -aes-256-cbc -a -salt -k %s", plaintext, passphrase))
+
+        var out bytes.Buffer
+        cmd.Stdout = &out
+        cmd.Stderr = &out
+
+        err := cmd.Run()
+        if err != nil {
+                t.Errorf("OpenSSL errored: %s", err)
+        }
+
+        dec, err := DecryptString(passphrase, out.String())
+        if err != nil {
+                t.Fatalf("Test errored at decrypt: %s\n.Output was: %s", err, out.String())
+        }
+
+        if string(dec) != plaintext {
+		t.Errorf("Decrypted text did not match input.")
+        }
+}

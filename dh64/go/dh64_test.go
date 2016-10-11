@@ -1,9 +1,27 @@
 package dh64
 
 import (
-	"github.com/funny/unitest"
+	"math/big"
+	"math/rand"
 	"testing"
+
+	"github.com/funny/utest"
 )
+
+func Test_MulModP(t *testing.T) {
+	for i := 0; i < 10000; i++ {
+		a := rand.Uint32()
+		b := rand.Uint32()
+		x := new(big.Int).Mod(
+			new(big.Int).Mul(
+				big.NewInt(int64(a)),
+				big.NewInt(int64(b)),
+			),
+			new(big.Int).SetUint64(p),
+		).Uint64()
+		utest.EqualNow(t, mul_mod_p(uint64(a), uint64(b)), x)
+	}
+}
 
 func Test_DH64_GO(t *testing.T) {
 	for i := 0; i < 10000; i += 2 {
@@ -12,7 +30,7 @@ func Test_DH64_GO(t *testing.T) {
 
 		secret1 := Secret(privateKey1, publicKey2)
 		secret2 := Secret(privateKey2, publicKey1)
-		unitest.Pass(t, secret1 == secret2)
+		utest.EqualNow(t, secret1, secret2)
 	}
 }
 
@@ -22,16 +40,16 @@ func Test_DH64_C(t *testing.T) {
 		data2 := data[i+1]
 
 		publicKey1 := PublicKey(data1.PrivateKey)
-		unitest.Pass(t, publicKey1 == data1.PublicKey)
+		utest.EqualNow(t, publicKey1, data1.PublicKey)
 
 		publicKey2 := PublicKey(data2.PrivateKey)
-		unitest.Pass(t, publicKey2 == data2.PublicKey)
+		utest.EqualNow(t, publicKey2, data2.PublicKey)
 
 		secret1 := Secret(data1.PrivateKey, data2.PublicKey)
-		unitest.Pass(t, secret1 == data1.Secret)
+		utest.EqualNow(t, secret1, data1.Secret)
 
 		secret2 := Secret(data2.PrivateKey, data1.PublicKey)
-		unitest.Pass(t, secret2 == data2.Secret)
+		utest.EqualNow(t, secret2, data2.Secret)
 	}
 }
 
